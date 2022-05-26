@@ -32,6 +32,11 @@ ui <- fluidPage(
       checkboxGroupInput("Cohort", "Cohort:",
                    choices = unique(inventory$Cohort), selected = c("2019","2020","2021")),
       
+      checkboxGroupInput("Facility", "Facility:",
+                         choices = unique(inventory$Facility), selected = c("MCR","SA","PTMSC")),
+      
+      ### WANT TO: ADD inputs for family (write-in option). Not sure how to add this to the reactive in the server section but default keeping all families.
+      
       # br() element to introduce extra vertical spacing ----
       br(),
       
@@ -62,8 +67,8 @@ ui <- fluidPage(
       hr(),
     titlePanel("Current Issue to sort:"),
     p("1. wrangle data for model selection"),
-    p("2. select model and decide on visual to showcase"),
-    p("3. rework reactive so data allows more than one sorting feature (i.e. cohort, family, and/or facility)"),
+    p("2. select model and decide on visual to showcase (include graph and summary table to give final counts at X time"),
+    p("3. rework reactive so data allows more than one sorting feature (i.e. cohort, family, and/or facility). Will likely add a second reactive option for projection data"),
     p("4. Add file upload option for satellite facilites to view their newly collected data"),
     p("5. Work on formatting and overall appearance")
       )
@@ -79,7 +84,7 @@ server <- function(input, output) {
   # defined below then use the value computed from this expression
     df_filtered <- reactive({
       
-      df <- filter(inventory, Cohort == input$Cohort)
+      df <- filter(inventory, Cohort == input$Cohort, Facility == input$Facility)
       
       return(df)
       
@@ -124,6 +129,7 @@ server <- function(input, output) {
                                              striped = TRUE, 
                                              highlight = TRUE)})
   #Projections
+  #WANT TO: Figure out which data to use for this and which model to use. 
   #Plot3
   output$plot3 <- renderPlot({
     ggplot(df_filtered(), aes(x = Age.Month, y = Mean.Size, color = as.factor(`Cohort`))) + 
